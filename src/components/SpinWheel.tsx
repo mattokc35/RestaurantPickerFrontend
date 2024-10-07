@@ -34,7 +34,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
   useEffect(() => {
     if (socket) {
       // Listen for the spin-wheel event from the server
-      socket.on("spin-wheel", ({ restaurant, index }) => {
+      socket.on("spin-wheel", ({ index }) => {
         setSelectedRestaurant(null); // Hide selected restaurant while spinning
         setSpinResult(index); // Store the index of the result
         setMustSpin(true); // Start the spinning animation

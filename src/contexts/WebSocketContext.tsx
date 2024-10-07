@@ -16,7 +16,7 @@ export const WebSocketProvider: React.FC<any> = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socketConnection = io("http://localhost:4000");
+    const socketConnection = io(process.env.BACKEND_BASE_URL);
     setSocket(socketConnection);
 
     socketConnection.on("connect", () => {
