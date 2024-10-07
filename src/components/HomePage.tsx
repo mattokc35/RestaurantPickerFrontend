@@ -23,12 +23,12 @@ const HomePage = () => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      height="100vh"
       sx={{
         backgroundColor: "#242424",
+        minHeight: "95vh",
         color: theme.palette.text.primary,
         padding: isMobile ? "20px" : "40px",
-        textAlign: "center",
+        textAlign: "center", 
       }}
     >
       {/* Add food-related icons */}

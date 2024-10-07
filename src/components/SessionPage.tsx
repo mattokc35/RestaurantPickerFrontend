@@ -55,22 +55,25 @@ const SessionPage = () => {
       alignItems="center"
       justifyContent="center"
       sx={{
+        minHeight: "100vh", // Ensures full viewport height
+        minWidth: "auto",
         backgroundColor: "#242424",
         color: theme.palette.text.primary,
         padding: isMobile ? "20px" : "40px",
         textAlign: "center",
+        overflowY: "auto", // Allows scrolling for overflowing content
       }}
     >
       <Box
         sx={{
-          width: isMobile ? "100%" : "600px",
+          width: isMobile ? "90%" : "600px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          backgroundColor: isMobile ? "transparent" : "#333", // No background color on mobile
-          borderRadius: isMobile ? "0px" : "12px", // No border radius on mobile
+          backgroundColor: isMobile ? "transparent" : "#333",
+          borderRadius: isMobile ? "0px" : "12px",
           padding: isMobile ? "10px" : "30px",
-          boxShadow: isMobile ? "none" : "0px 4px 20px rgba(0, 0, 0, 0.3)", // No shadow on mobile
+          boxShadow: isMobile ? "none" : "0px 4px 20px rgba(0, 0, 0, 0.3)",
         }}
       >
         <Typography
@@ -107,13 +110,13 @@ const SessionPage = () => {
                     <ListItem
                       key={index}
                       sx={{
-                        backgroundColor: "#1E1E1E", // No card background on mobile
+                        backgroundColor: "#1E1E1E",
                         padding: "10px",
                         borderRadius: "8px",
                         marginBottom: "10px",
                         transition: "background-color 0.2s",
                         "&:hover": {
-                          backgroundColor: "#2C2C2C", // No hover effect on mobile
+                          backgroundColor: "#2C2C2C",
                         },
                       }}
                     >

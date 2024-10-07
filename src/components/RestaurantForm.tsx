@@ -45,6 +45,7 @@ const RestaurantForm = () => {
             size="medium"
             sx={{
               input: { color: "#fff" },
+              maxWidth: isMobile ? "100%" : "400px",
               "& .MuiOutlinedInput-root": {
                 "& fieldset": {
                   borderColor: "#555",
@@ -74,8 +75,9 @@ const RestaurantForm = () => {
               backgroundColor: "#ff5722", // Button color matching the food theme
               color: "#fff",
               fontWeight: "bold",
+              maxWidth: isMobile ? "100%" : "150px",
               "&:hover": {
-                backgroundColor: "#ff1744", // Hover color matching the theme
+                backgroundColor: "#ff1744",
               },
             }}
           >
