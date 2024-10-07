@@ -16,7 +16,7 @@ export const WebSocketProvider: React.FC<any> = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socketConnection = io(process.env.BACKEND_BASE_URL);
+    const socketConnection = io("https://restaurantpickerbackend.onrender.com");
     setSocket(socketConnection);
 
     socketConnection.on("connect", () => {
