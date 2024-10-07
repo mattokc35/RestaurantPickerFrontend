@@ -124,7 +124,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
             backgroundColor: "#ff1744",
           },
           width: "100%",
-          maxWidth: "300px",
+          maxWidth: "400px",
           borderRadius: "8px",
           boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)"
         }}

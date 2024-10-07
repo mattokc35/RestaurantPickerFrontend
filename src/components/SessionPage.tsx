@@ -66,7 +66,7 @@ const SessionPage = () => {
     >
       <Box
         sx={{
-          width: isMobile ? "90%" : "600px",
+          width: isMobile ? "90%" : "620px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
