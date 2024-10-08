@@ -2,7 +2,11 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import HomePage from "./components/HomePage";
 import SessionPage from "./components/SessionPage";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
-import "./App.css"
+import "./App.css";
+
+function NotFoundRedirect() {
+  return <Navigate to="/" />;
+}
 
 function App() {
   return (
@@ -11,7 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/session/:id" element={<SessionPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFoundRedirect />} />
         </Routes>
       </Router>
     </WebSocketProvider>
