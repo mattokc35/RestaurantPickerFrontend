@@ -96,7 +96,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
           radiusLineWidth={5}
           fontSize={18}
           perpendicularText={true}
-          spinDuration={1.5}
+          spinDuration={3}
         />
       )}
 
