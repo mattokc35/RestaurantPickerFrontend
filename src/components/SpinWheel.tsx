@@ -6,7 +6,8 @@ import { Wheel } from "react-custom-roulette";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
-import Confetti from "react-confetti"; // Import Confetti library
+import Confetti from "react-confetti";
+import { useRoleStore } from "../store/roleStore";
 
 type SpinWheelProps = {
   restaurants: string[];
@@ -14,18 +15,18 @@ type SpinWheelProps = {
 
 const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
   const { socket } = useWebSocket();
-  const navigate = useNavigate(); // Use React Router's useNavigate for navigation
+  const navigate = useNavigate(); 
+  const role = useRoleStore((state)=>state.role);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [spinResult, setSpinResult] = useState<number | null>(null);
   const [mustSpin, setMustSpin] = useState(false);
   const [spinning, setSpinning] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false); // Track confetti display
+  const [showConfetti, setShowConfetti] = useState(false); 
 
-  // Convert restaurant names to format required by react-custom-roulette
   const data = restaurants.map((restaurant) => ({ option: restaurant }));
 
   const handleSpin = () => {
-    if (socket && restaurants.length > 0 && !spinning) {
+    if (socket && restaurants.length > 0 && !spinning && role === "host") {
       setSpinning(true); 
       socket.emit("spin-wheel");
     }
@@ -33,44 +34,40 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
 
   useEffect(() => {
     if (socket) {
-      // Listen for the spin-wheel event from the server
       socket.on("spin-wheel", ({ index }) => {
-        setSelectedRestaurant(null); // Hide selected restaurant while spinning
-        setSpinResult(index); // Store the index of the result
-        setMustSpin(true); // Start the spinning animation
+        setSelectedRestaurant(null); 
+        setSpinResult(index); 
+        setMustSpin(true); 
         setSpinning(true);
       });
 
-      // Listen for session deletion from the server
       socket.on("session-deleted", () => {
         setTimeout(() => {
-          navigate("/"); // Navigate back to the homepage after session deletion
-        }, 2000); // Give a small delay to allow user to process the result
+          navigate("/"); 
+        }, 2000); 
       });
 
       return () => {
         socket.off("spin-wheel");
-        socket.off("session-deleted"); // Clean up event listener
+        socket.off("session-deleted"); 
       };
     }
   }, [socket, navigate]);
 
   useEffect(() => {
     if (selectedRestaurant) {
-      // Show confetti after the wheel stops and the restaurant is selected
       setShowConfetti(true);
-      // Hide confetti and delete session after 5 seconds
       setTimeout(() => {
         setShowConfetti(false);
-        socket?.emit("delete-session"); // Emit event to delete the session
-      }, 5000); // Display confetti for 5 seconds
+        socket?.emit("delete-session"); 
+      }, 5000); 
     }
   }, [selectedRestaurant, socket]);
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" sx={{ backgroundColor: "#2c2c2c", padding: "20px", borderRadius: "12px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.5)" }}>
-      {showConfetti && <Confetti /> /* Render confetti */}
-      
+      {showConfetti && <Confetti />}
+
       <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" mb={4}>
         <RestaurantIcon sx={{ color: "#ff9800", fontSize: 50 }} />
         <FastfoodIcon sx={{ color: "#ff5722", fontSize: 50 }} />
@@ -111,27 +108,29 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
         </>
       )}
 
-      <Button
-        variant="contained"
-        onClick={handleSpin}
-        sx={{
-          marginTop: "20px",
-          padding: "12px",
-          backgroundColor: "#ff5722",
-          color: "#fff",
-          fontWeight: "bold",
-          "&:hover": {
-            backgroundColor: "#ff1744",
-          },
-          width: "100%",
-          maxWidth: "400px",
-          borderRadius: "8px",
-          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)"
-        }}
-        disabled={spinning}
-      >
-        Spin the Wheel
-      </Button>
+      {role === "host" && (
+        <Button
+          variant="contained"
+          onClick={handleSpin}
+          sx={{
+            marginTop: "20px",
+            padding: "12px",
+            backgroundColor: "#ff5722",
+            color: "#fff",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "#ff1744",
+            },
+            width: "100%",
+            maxWidth: "400px",
+            borderRadius: "8px",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)"
+          }}
+          disabled={spinning}
+        >
+          Spin the Wheel
+        </Button>
+      )}
     </Box>
   );
 };

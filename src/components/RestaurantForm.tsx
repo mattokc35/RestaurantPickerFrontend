@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWebSocket } from "../contexts/WebSocketContext";
 import {
   Button,
@@ -11,6 +11,7 @@ import {
 
 const RestaurantForm = () => {
   const [restaurant, setRestaurant] = useState("");
+  const [hasSuggested, setHasSuggested] = useState(false); // Track whether the user has suggested
   const { socket } = useWebSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -19,8 +20,23 @@ const RestaurantForm = () => {
     if (socket && restaurant) {
       socket.emit("suggest-restaurant", restaurant);
       setRestaurant("");
+      setHasSuggested(true); // Disable form after submission
     }
   };
+
+  useEffect(() => {
+    if (socket) {
+      // Listen for any errors from the backend
+      socket.on("error", (message) => {
+        alert(message); // Show the error (e.g., if the user has already suggested)
+      });
+
+      // Clean up the listener
+      return () => {
+        socket.off("error");
+      };
+    }
+  }, [socket]);
 
   return (
     <Box
@@ -43,6 +59,7 @@ const RestaurantForm = () => {
             label="Suggest a Restaurant"
             variant="outlined"
             size="medium"
+            disabled={hasSuggested} // Disable input after suggestion
             sx={{
               input: { color: "#fff" },
               maxWidth: isMobile ? "100%" : "500px",
@@ -69,6 +86,7 @@ const RestaurantForm = () => {
             variant="contained"
             color="primary"
             fullWidth
+            disabled={hasSuggested} // Disable button after suggestion
             sx={{
               padding: isMobile ? "10px" : "14px",
               fontSize: isMobile ? "14px" : "16px",

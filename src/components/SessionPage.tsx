@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useWebSocket } from "../contexts/WebSocketContext";
 import RestaurantForm from "./RestaurantForm";
 import SpinWheel from "./SpinWheel";
+import { useRoleStore } from "../store/roleStore";
 import {
   Box,
   Typography,
@@ -15,14 +16,19 @@ import {
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const role = useRoleStore((state) => state.role);
   const [restaurants, setRestaurants] = useState<string[]>([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    if (socket) {
-      // Emit the join-session event
-      socket.emit("join-session", id);
+    if (socket && id) {
+      if (role === "host") {
+        socket.emit("create-session", id);
+      } else {
+        socket.emit("join-session", id);
+      }
 
       // Get the current list of restaurants when joining the session
       socket.on("current-restaurants", (restaurantList: string[]) => {
@@ -39,11 +45,17 @@ const SessionPage = () => {
         alert(`Selected restaurant: ${restaurant}`);
       });
 
+      socket.on("session-deleted", () => {
+        alert("The session was deleted.");
+        navigate("/"); // Redirect to home page
+      });
+
       // Clean up the socket listeners on component unmount
       return () => {
         socket.off("current-restaurants");
         socket.off("restaurant-suggested");
         socket.off("restaurant-selected");
+        socket.off("role-assigned");
       };
     }
   }, [socket, id]);
@@ -86,8 +98,13 @@ const SessionPage = () => {
         >
           Room ID: {id}
         </Typography>
-        {connected ? (
+        {connected && role ? (
           <>
+            {role === "host" ? (
+              <Typography>You are the Host</Typography>
+            ) : (
+              <Typography>You are a Guest</Typography>
+            )}
             <RestaurantForm />
             <Box sx={{ width: "100%", marginTop: "20px" }}>
               <Typography
