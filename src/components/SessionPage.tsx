@@ -15,10 +15,10 @@ import {
 } from "@mui/material";
 
 // Icons
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import FastfoodIcon from '@mui/icons-material/Fastfood';
-import LocalPizzaIcon from '@mui/icons-material/LocalPizza';
-import IcecreamIcon from '@mui/icons-material/Icecream';
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import FastfoodIcon from "@mui/icons-material/Fastfood";
+import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
+import IcecreamIcon from "@mui/icons-material/Icecream";
 
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
@@ -85,7 +85,13 @@ const SessionPage = () => {
         overflowY: "auto", // Allows scrolling for overflowing content
       }}
     >
-      <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" mb={4}>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        justifyContent="center"
+        mb={4}
+      >
         <RestaurantIcon sx={{ color: "#ff9800", fontSize: 50 }} />
         <FastfoodIcon sx={{ color: "#ff5722", fontSize: 50 }} />
         <LocalPizzaIcon sx={{ color: "#ff1744", fontSize: 50 }} />
@@ -117,16 +123,26 @@ const SessionPage = () => {
         {connected && role ? (
           <>
             {role === "host" ? (
-              <Typography sx={{ color: "#4CAF50", fontWeight: "bold" }}>You are the Host</Typography>
+              <>
+                <Typography sx={{ color: "#4CAF50", fontWeight: "bold" }}>
+                  You are the Host. Please suggest a restaurant and wait for other guests to submit their restaurants as well. You can then spin the wheel or start a game!
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: "#777",
+                    marginBottom: "10px",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {userCount}/10 foodies joined{" "}
+                </Typography>
+              </>
             ) : (
-              <Typography sx={{ color: "#F44336", fontWeight: "bold" }}>You are a Guest</Typography>
+              <Typography sx={{ color: "#F44336", fontWeight: "bold" }}>
+                You are a Guest. Please suggest a restaurant then wait for the host to spin the wheel or start the game!
+              </Typography>
             )}
-            <Typography
-              variant="body1"
-              sx={{ color: "#777", marginBottom: "10px", fontStyle: "italic" }}
-            >
-              {userCount}/10 foodies joined
-            </Typography>
 
             <RestaurantForm />
             <Box sx={{ width: "100%", marginTop: "20px" }}>
