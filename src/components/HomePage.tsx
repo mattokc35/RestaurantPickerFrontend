@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, TextField, Box, Typography, Stack, useTheme, useMediaQuery } from "@mui/material";
-import { v4 as uuidv4 } from "uuid";
 import { useWebSocket } from "../contexts/WebSocketContext";
 import { useRoleStore } from "../store/roleStore";
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import IcecreamIcon from '@mui/icons-material/Icecream';
 
+const generateRoomId = () => {
+  return Math.random().toString(36).substr(2, 4).toUpperCase();
+};
+
 const HomePage = () => {
   const [sessionId, setSessionId] = useState("");
+  const [clipboardMsg, setClipboardMsg] = useState(""); // Message to show if copied
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -48,8 +52,17 @@ const HomePage = () => {
   };
 
   const handleCreateSession = () => {
-    const newSessionId = uuidv4();
+    const newSessionId = generateRoomId(); // Generate a 4-character room ID
     setRole("host"); // Set role as host
+    setSessionId(newSessionId); // Set the session ID
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(newSessionId).then(() => {
+      setClipboardMsg("Room ID copied to clipboard! Share it with your friends.");
+      setTimeout(() => setClipboardMsg(""), 3000); // Clear message after 3 seconds
+    });
+
+    // Navigate to session page
     navigate(`/session/${newSessionId}`);
   };
 
@@ -78,6 +91,12 @@ const HomePage = () => {
       <Typography variant="h5" sx={{ marginBottom: "20px", color: "#ff5722", fontWeight: "bold" }}>
         Create or Join a Room
       </Typography>
+
+      {clipboardMsg && (
+        <Typography variant="body2" sx={{ marginBottom: "10px", color: "#4caf50" }}>
+          {clipboardMsg}
+        </Typography>
+      )}
 
       <Button
         variant="contained"
