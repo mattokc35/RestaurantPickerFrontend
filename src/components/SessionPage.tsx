@@ -98,7 +98,7 @@ const SessionPage = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          backgroundColor: isMobile ? "transparent" : "#FFFFFF", // White background for cards
+          backgroundColor: isMobile ? "transparent" : "#fff3e0", // White background for cards
           borderRadius: isMobile ? "0px" : "12px",
           padding: isMobile ? "10px" : "30px",
           boxShadow: isMobile ? "none" : "0px 4px 20px rgba(0, 0, 0, 0.1)",
