@@ -19,6 +19,7 @@ const SessionPage = () => {
   const navigate = useNavigate();
   const role = useRoleStore((state) => state.role);
   const [restaurants, setRestaurants] = useState<string[]>([]);
+  const [userCount, setUserCount] = useState<number | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -26,10 +27,7 @@ const SessionPage = () => {
     if (socket && id) {
       if (role === "host") {
         socket.emit("create-session", id);
-      } else {
-        socket.emit("join-session", id);
       }
-
       // Get the current list of restaurants when joining the session
       socket.on("current-restaurants", (restaurantList: string[]) => {
         setRestaurants(restaurantList);
@@ -43,6 +41,10 @@ const SessionPage = () => {
       // Handle restaurant selection after spinning the wheel
       socket.on("restaurant-selected", (restaurant: string) => {
         alert(`Selected restaurant: ${restaurant}`);
+      });
+
+      socket.on("current-users", ({ count }: { count: number }) => {
+        setUserCount(count);
       });
 
       socket.on("session-deleted", () => {
@@ -98,13 +100,20 @@ const SessionPage = () => {
         >
           Room ID: {id}
         </Typography>
-        {connected && role ? (
+        {connected && role && userCount ? (
           <>
             {role === "host" ? (
               <Typography>You are the Host</Typography>
             ) : (
               <Typography>You are a Guest</Typography>
             )}
+            <Typography
+              variant="body1"
+              sx={{ color: "#fff", marginBottom: "10px" }}
+            >
+              {userCount}/10 foodies joined
+            </Typography>
+
             <RestaurantForm />
             <Box sx={{ width: "100%", marginTop: "20px" }}>
               <Typography

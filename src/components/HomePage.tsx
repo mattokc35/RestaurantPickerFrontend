@@ -1,10 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, TextField, Box, Typography, useTheme, useMediaQuery } from "@mui/material";
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import FastfoodIcon from '@mui/icons-material/Fastfood';
-import LocalPizzaIcon from '@mui/icons-material/LocalPizza';
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
+import { useWebSocket } from "../contexts/WebSocketContext"; // Import WebSocket context
 import { useRoleStore } from "../store/roleStore";
 
 const HomePage = () => {
@@ -13,11 +11,35 @@ const HomePage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const setRole = useRoleStore((state) => state.setRole);
+  const { socket } = useWebSocket(); // Access the socket instance
+  const [error, setError] = useState<string | null>(null); // Track errors
+
+  // Handle room full error
+  useEffect(() => {
+    if (socket) {
+      socket.on("error", (message: string) => {
+        setError(message); // Set error message
+        alert(message); // Show alert to the user
+      });
+
+      return () => {
+        socket.off("error"); // Clean up on unmount
+      };
+    }
+  }, [socket]);
 
   const handleJoinSession = () => {
-    if (sessionId) {
-      setRole("guest"); // Set role as guest
-      navigate(`/session/${sessionId}`);
+    if (sessionId && socket) {
+      socket.emit("join-session", sessionId);
+
+      socket.on("join-success", () => {
+        setRole("guest");
+        navigate(`/session/${sessionId}`);
+      })
+
+      socket.on("error", (errorMsg: string)=> {
+        alert(errorMsg);
+      })
     }
   };
 
@@ -26,7 +48,6 @@ const HomePage = () => {
     setRole("host"); // Set role as host
     navigate(`/session/${newSessionId}`);
   };
-
 
   return (
     <Box
@@ -97,7 +118,6 @@ const HomePage = () => {
         Join Room
       </Button>
     </Box>
-
   );
 };
 
