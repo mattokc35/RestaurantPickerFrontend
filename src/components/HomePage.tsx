@@ -20,6 +20,7 @@ const HomePage = () => {
       socket.on("error", (message: string) => {
         setError(message); // Set error message
         alert(message); // Show alert to the user
+        console.error(error);
       });
 
       return () => {
