@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, TextField, Box, Typography, useTheme, useMediaQuery } from "@mui/material";
+import { Button, TextField, Box, Typography, Stack, useTheme, useMediaQuery } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
-import { useWebSocket } from "../contexts/WebSocketContext"; // Import WebSocket context
+import { useWebSocket } from "../contexts/WebSocketContext";
 import { useRoleStore } from "../store/roleStore";
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import IcecreamIcon from '@mui/icons-material/Icecream';
 
 const HomePage = () => {
   const [sessionId, setSessionId] = useState("");
@@ -57,30 +60,39 @@ const HomePage = () => {
       alignItems="center"
       justifyContent="center"
       sx={{
-        backgroundColor: "#242424",
+        backgroundColor: "#fff3e0", // Lighter background for a friendly look
         minHeight: "95vh",
         color: theme.palette.text.primary,
         padding: isMobile ? "20px" : "40px",
         textAlign: "center",
+        borderRadius: "12px", // Rounded edges for the entire container
+        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)", // Add a soft shadow
       }}
     >
-      <Typography variant="h5" sx={{ marginBottom: "20px", color: "#fff" }}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={4}>
+        <RestaurantIcon sx={{ color: "#ff9800", fontSize: 50 }} />
+        <FastfoodIcon sx={{ color: "#ff5722", fontSize: 50 }} />
+        <IcecreamIcon sx={{ color: "#ffc107", fontSize: 50 }} />
+      </Stack>
+
+      <Typography variant="h5" sx={{ marginBottom: "20px", color: "#ff5722", fontWeight: "bold" }}>
         Create or Join a Room
       </Typography>
 
       <Button
         variant="contained"
-        color="primary"
         onClick={handleCreateSession}
         sx={{
           width: "100%",
           maxWidth: "400px",
           padding: "12px",
           marginBottom: "20px",
-          backgroundColor: "#ff5722",
+          backgroundColor: "#ff5722", // Bright button color
           color: "#fff",
           fontWeight: "bold",
+          borderRadius: "8px",
           "&:hover": { backgroundColor: "#ff1744" },
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
         }}
       >
         Create a Room
@@ -93,15 +105,17 @@ const HomePage = () => {
         onChange={(e) => setSessionId(e.target.value)}
         variant="outlined"
         sx={{
-          input: { color: "#fff" },
+          input: { color: "#333" },
           "& .MuiOutlinedInput-root": {
-            "& fieldset": { borderColor: "#555" },
-            "&:hover fieldset": { borderColor: "#888" },
-            "&.Mui-focused fieldset": { borderColor: "#00bcd4" },
+            "& fieldset": { borderColor: "#888" },
+            "&:hover fieldset": { borderColor: "#ff9800" },
+            "&.Mui-focused fieldset": { borderColor: "#ff5722" },
           },
-          "& .MuiInputLabel-root": { color: "#aaa" },
+          "& .MuiInputLabel-root": { color: "#888" },
+          maxWidth: "400px",
         }}
       />
+
       <Button
         onClick={handleJoinSession}
         variant="contained"
@@ -110,10 +124,12 @@ const HomePage = () => {
           marginTop: "20px",
           width: "100%",
           padding: "12px",
-          backgroundColor: "#ff5722",
+          backgroundColor: "#ff5722", // Button matches the theme
           color: "#fff",
           fontWeight: "bold",
+          borderRadius: "8px",
           "&:hover": { backgroundColor: "#ff1744" },
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
         }}
       >
         Join Room

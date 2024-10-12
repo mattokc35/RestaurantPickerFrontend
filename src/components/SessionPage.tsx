@@ -9,9 +9,16 @@ import {
   Typography,
   List,
   ListItem,
+  Stack,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+
+// Icons
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import LocalPizzaIcon from '@mui/icons-material/LocalPizza';
+import IcecreamIcon from '@mui/icons-material/Icecream';
 
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
@@ -71,23 +78,30 @@ const SessionPage = () => {
       sx={{
         minHeight: "100vh", // Ensures full viewport height
         minWidth: "auto",
-        backgroundColor: "#242424",
+        backgroundColor: "#fff3e0", // Lighter, playful background
         color: theme.palette.text.primary,
         padding: isMobile ? "20px" : "40px",
         textAlign: "center",
         overflowY: "auto", // Allows scrolling for overflowing content
       }}
     >
+      <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" mb={4}>
+        <RestaurantIcon sx={{ color: "#ff9800", fontSize: 50 }} />
+        <FastfoodIcon sx={{ color: "#ff5722", fontSize: 50 }} />
+        <LocalPizzaIcon sx={{ color: "#ff1744", fontSize: 50 }} />
+        <IcecreamIcon sx={{ color: "#ffc107", fontSize: 50 }} />
+      </Stack>
+
       <Box
         sx={{
           width: isMobile ? "90%" : "620px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          backgroundColor: isMobile ? "transparent" : "#333",
+          backgroundColor: isMobile ? "transparent" : "#FFFFFF", // White background for cards
           borderRadius: isMobile ? "0px" : "12px",
           padding: isMobile ? "10px" : "30px",
-          boxShadow: isMobile ? "none" : "0px 4px 20px rgba(0, 0, 0, 0.3)",
+          boxShadow: isMobile ? "none" : "0px 4px 20px rgba(0, 0, 0, 0.1)",
         }}
       >
         <Typography
@@ -95,21 +109,21 @@ const SessionPage = () => {
           sx={{
             marginBottom: "20px",
             fontWeight: 500,
-            color: "#fff",
+            color: "#333", // Darker text for contrast
           }}
         >
           Room ID: {id}
         </Typography>
-        {connected && role && userCount ? (
+        {connected && role ? (
           <>
             {role === "host" ? (
-              <Typography>You are the Host</Typography>
+              <Typography sx={{ color: "#4CAF50", fontWeight: "bold" }}>You are the Host</Typography>
             ) : (
-              <Typography>You are a Guest</Typography>
+              <Typography sx={{ color: "#F44336", fontWeight: "bold" }}>You are a Guest</Typography>
             )}
             <Typography
               variant="body1"
-              sx={{ color: "#fff", marginBottom: "10px" }}
+              sx={{ color: "#777", marginBottom: "10px", fontStyle: "italic" }}
             >
               {userCount}/10 foodies joined
             </Typography>
@@ -118,7 +132,7 @@ const SessionPage = () => {
             <Box sx={{ width: "100%", marginTop: "20px" }}>
               <Typography
                 variant="h6"
-                sx={{ color: "#fff", marginBottom: "10px" }}
+                sx={{ color: "#333", marginBottom: "10px" }}
               >
                 Suggested Restaurants:
               </Typography>
@@ -130,33 +144,39 @@ const SessionPage = () => {
                     borderRadius: "8px",
                     maxHeight: "300px",
                     overflowY: "auto",
+                    padding: 0,
                   }}
                 >
                   {restaurants.map((r, index) => (
                     <ListItem
                       key={index}
                       sx={{
-                        backgroundColor: "#1E1E1E",
+                        backgroundColor: "#F1F1F1",
                         padding: "10px",
                         borderRadius: "8px",
                         marginBottom: "10px",
                         transition: "background-color 0.2s",
                         "&:hover": {
-                          backgroundColor: "#2C2C2C",
+                          backgroundColor: "#EAEAEA",
                         },
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                       }}
                     >
                       <Typography
                         variant="body1"
-                        sx={{ color: "#E0E0E0", fontWeight: "bold" }}
+                        sx={{ color: "#333", fontWeight: "bold" }}
                       >
                         {r}
                       </Typography>
+                      {/* Add a playful food icon next to each restaurant */}
+                      <FastfoodIcon sx={{ color: "#ff9800" }} />
                     </ListItem>
                   ))}
                 </List>
               ) : (
-                <Typography variant="h6" sx={{ color: "#ccc" }}>
+                <Typography variant="h6" sx={{ color: "#aaa" }}>
                   None
                 </Typography>
               )}

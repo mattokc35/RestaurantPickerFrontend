@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate } from "react-router-dom";
 import { useWebSocket } from "../contexts/WebSocketContext";
 import { Button, Box, Typography, Stack } from "@mui/material";
 import { Wheel } from "react-custom-roulette";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
+import IcecreamIcon from "@mui/icons-material/Icecream"; // Add playful ice cream icon
 import Confetti from "react-confetti";
 import { useRoleStore } from "../store/roleStore";
 
@@ -21,7 +22,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
   const [spinResult, setSpinResult] = useState<number | null>(null);
   const [mustSpin, setMustSpin] = useState(false);
   const [spinning, setSpinning] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false); 
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const data = restaurants.map((restaurant) => ({ option: restaurant }));
 
@@ -59,19 +60,20 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
       setShowConfetti(true);
       setTimeout(() => {
         setShowConfetti(false);
-        socket?.emit("delete-session"); 
-      }, 5000); 
+        socket?.emit("delete-session");
+      }, 5000);
     }
   }, [selectedRestaurant, socket]);
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" sx={{ backgroundColor: "#2c2c2c", padding: "20px", borderRadius: "12px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.5)" }}>
+    <Box display="flex" flexDirection="column" alignItems="center" sx={{ backgroundColor: "#fff3e0", padding: "20px", borderRadius: "12px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)" }}>
       {showConfetti && <Confetti />}
 
       <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" mb={4}>
         <RestaurantIcon sx={{ color: "#ff9800", fontSize: 50 }} />
         <FastfoodIcon sx={{ color: "#ff5722", fontSize: 50 }} />
         <LocalPizzaIcon sx={{ color: "#ff1744", fontSize: 50 }} />
+        <IcecreamIcon sx={{ color: "#ffc107", fontSize: 50 }} />
       </Stack>
 
       {restaurants.length > 0 && (
@@ -99,12 +101,12 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
 
       {!mustSpin && selectedRestaurant && (
         <>
-        <Typography variant="h6" sx={{ color: "#fff", marginTop: "20px", fontWeight: "bold" }}>
-          Selected Restaurant: {selectedRestaurant}
-        </Typography>
-        <Typography variant="h6" sx={{ color: "#fff", marginTop: "20px", fontWeight: "bold" }}>
-          Thanks for playing! This room is now closing and you will be redirected back to the home page.
-        </Typography>
+          <Typography variant="h6" sx={{ color: "#ff5722", marginTop: "20px", fontWeight: "bold" }}>
+            Selected Restaurant: {selectedRestaurant}
+          </Typography>
+          <Typography variant="h6" sx={{ color: "#333", marginTop: "20px", fontWeight: "bold" }}>
+            Thanks for playing! This room is now closing, and you will be redirected back to the home page.
+          </Typography>
         </>
       )}
 
