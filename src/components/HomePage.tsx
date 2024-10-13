@@ -91,7 +91,7 @@ const HomePage = () => {
   };
 
   const handleSessionIdChange = (id: string) => {
-    setSessionId((prevSessionId) => (prevSessionId = id));
+    setSessionId(id);
     setErrorMessage(null);
   };
 
