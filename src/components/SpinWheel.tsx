@@ -95,16 +95,16 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
           radiusLineWidth={5}
           fontSize={18}
           perpendicularText={true}
-          spinDuration={3}
+          spinDuration={0.5}
         />
       )}
 
       {!mustSpin && selectedRestaurant && (
         <>
-          <Typography variant="h6" sx={{ color: "#ff5722", marginTop: "20px", fontWeight: "bold" }}>
+          <Typography variant="h6" sx={{ color: "#ff5722", marginTop: "20px"}}>
             Selected Restaurant: {selectedRestaurant}
           </Typography>
-          <Typography variant="h6" sx={{ color: "#333", marginTop: "20px", fontWeight: "bold" }}>
+          <Typography variant="h6" sx={{ color: "#333", marginTop: "20px"}}>
             Thanks for playing! This room is now closing, and you will be redirected back to the home page.
           </Typography>
         </>
@@ -123,9 +123,9 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
             "&:hover": {
               backgroundColor: "#ff1744",
             },
-            width: "100%",
+
             maxWidth: "400px",
-            borderRadius: "8px",
+            borderRadius: "12px",
             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)"
           }}
           disabled={spinning}

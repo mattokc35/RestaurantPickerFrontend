@@ -34,16 +34,18 @@ const SessionPage = () => {
     if (socket && id) {
       if (role === "host") {
         socket.emit("create-session", id);
+      } else {
+        socket.emit("join-session", id);
       }
+
       // Get the current list of restaurants when joining the session
       socket.on("current-restaurants", (restaurantList: string[]) => {
-        debugger;
         setRestaurants(restaurantList);
       });
 
       // Add new suggested restaurants
-      socket.on("restaurant-suggested", (restaurant: string) => {
-        setRestaurants((prev) => [...prev, restaurant]);
+      socket.on("restaurant-suggested", (newRestaurant: string) => {
+        setRestaurants((prev) => [...prev, newRestaurant]);
       });
 
       // Handle restaurant selection after spinning the wheel
@@ -51,25 +53,27 @@ const SessionPage = () => {
         alert(`Selected restaurant: ${restaurant}`);
       });
 
+      // Handle updated user count
       socket.on("current-users", ({ count }: { count: number }) => {
-        debugger;
         setUserCount(count);
       });
 
+      // Handle session deletion
       socket.on("session-deleted", () => {
         alert("The session was deleted.");
         navigate("/"); // Redirect to home page
       });
 
-      // Clean up the socket listeners on component unmount
+      // Clean up socket listeners when component unmounts
       return () => {
         socket.off("current-restaurants");
         socket.off("restaurant-suggested");
         socket.off("restaurant-selected");
-        socket.off("role-assigned");
+        socket.off("current-users");
+        socket.off("session-deleted");
       };
     }
-  }, [socket, id]);
+  }, [socket, id, role, navigate]);
 
   return (
     <Box
@@ -109,7 +113,7 @@ const SessionPage = () => {
           backgroundColor: isMobile ? "transparent" : "#fff3e0", // White background for cards
           borderRadius: isMobile ? "0px" : "12px",
           padding: isMobile ? "10px" : "30px",
-          boxShadow: isMobile ? "none" : "0px 4px 20px rgba(0, 0, 0, 0.1)",
+          boxShadow: "none",
         }}
       >
         <Typography
@@ -126,23 +130,29 @@ const SessionPage = () => {
           <>
             {role === "host" ? (
               <>
-                <Typography sx={{ color: "#4CAF50", fontWeight: "bold" }}>
-                  You are the Host. Please suggest a restaurant and wait for other guests to submit their restaurants as well. You can then spin the wheel or start a game!
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: "#777",
-                    marginBottom: "10px",
-                    fontStyle: "italic",
-                  }}
-                >
-                  {userCount}/10 foodies joined{" "}
+                <Typography variant="body2" sx={{ color: "#4CAF50" }}>
+                  You are the Host. Please suggest a restaurant and wait for
+                  other guests to submit their restaurants as well. You can then
+                  spin the wheel or start a game!
                 </Typography>
               </>
             ) : (
-              <Typography sx={{ color: "#F44336", fontWeight: "bold" }}>
-                You are a Guest. Please suggest a restaurant then wait for the host to spin the wheel or start the game!
+              <Typography variant="body2" sx={{ color: "#F44336" }}>
+                You are a Guest. Please suggest a restaurant then wait for the
+                host to spin the wheel or start the game!
+              </Typography>
+            )}
+            {userCount && (
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#777",
+                  marginBottom: "10px",
+                  marginTop: "10px",
+                  fontStyle: "italic",
+                }}
+              >
+                {userCount}/10 foodies joined{" "}
               </Typography>
             )}
 

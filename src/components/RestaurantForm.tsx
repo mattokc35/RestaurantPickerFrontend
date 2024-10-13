@@ -10,8 +10,8 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import IcecreamIcon from '@mui/icons-material/Icecream';
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import IcecreamIcon from "@mui/icons-material/Icecream";
 
 const RestaurantForm = () => {
   const [restaurant, setRestaurant] = useState("");
@@ -54,7 +54,6 @@ const RestaurantForm = () => {
         marginTop: isMobile ? "10px" : "20px",
         backgroundColor: "#fff3e0", // Soft background color
         borderRadius: "12px",
-        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)", // Subtle shadow
       }}
     >
       <Stack direction="row" spacing={2} alignItems="center" mb={2}>
@@ -62,7 +61,10 @@ const RestaurantForm = () => {
         <IcecreamIcon sx={{ color: "#ffc107", fontSize: 40 }} />
       </Stack>
 
-      <Typography variant="h6" sx={{ marginBottom: "10px", color: "#333", fontWeight: "bold" }}>
+      <Typography
+        variant="h6"
+        sx={{ marginBottom: "10px", color: "#333", fontWeight: "bold" }}
+      >
         Suggest a Restaurant
       </Typography>
 
@@ -104,11 +106,11 @@ const RestaurantForm = () => {
             disabled={hasSuggested} // Disable button after suggestion
             sx={{
               padding: "14px",
-              fontSize: "16px",
               backgroundColor: "#ff5722", // Button color matching the theme
               color: "#fff",
               fontWeight: "bold",
-              borderRadius: "8px",
+              maxWidth: "400px",
+              borderRadius: "12px",
               "&:hover": {
                 backgroundColor: "#ff1744",
               },
