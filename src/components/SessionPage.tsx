@@ -37,6 +37,7 @@ const SessionPage = () => {
       }
       // Get the current list of restaurants when joining the session
       socket.on("current-restaurants", (restaurantList: string[]) => {
+        debugger;
         setRestaurants(restaurantList);
       });
 
@@ -51,6 +52,7 @@ const SessionPage = () => {
       });
 
       socket.on("current-users", ({ count }: { count: number }) => {
+        debugger;
         setUserCount(count);
       });
 
