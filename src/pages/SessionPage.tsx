@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useWebSocket } from "../contexts/WebSocketContext";
-import RestaurantForm from "./RestaurantForm";
-import SpinWheel from "./SpinWheel";
+import RestaurantForm from "../components/RestaurantForm";
+import SpinWheel from "../components/SpinWheel";
 import { useRoleStore } from "../store/roleStore";
 import {
   Box,
@@ -14,7 +14,6 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
-// Icons
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
@@ -156,7 +155,7 @@ const SessionPage = () => {
               </Typography>
             )}
 
-            <RestaurantForm />
+            <RestaurantForm sessionId={id}/>
             <Box sx={{ width: "100%", marginTop: "20px" }}>
               <Typography
                 variant="h6"

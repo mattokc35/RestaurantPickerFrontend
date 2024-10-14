@@ -13,7 +13,11 @@ import {
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import IcecreamIcon from "@mui/icons-material/Icecream";
 
-const RestaurantForm = () => {
+interface restaurantFormProps {
+  sessionId?: string
+}
+
+const RestaurantForm = ({sessionId}: restaurantFormProps) => {
   const [restaurant, setRestaurant] = useState("");
   const [hasSuggested, setHasSuggested] = useState(false); // Track whether the user has suggested
   const { socket } = useWebSocket();
@@ -22,7 +26,7 @@ const RestaurantForm = () => {
 
   const handleSubmit = () => {
     if (socket && restaurant) {
-      socket.emit("suggest-restaurant", restaurant);
+      socket.emit("suggest-restaurant", sessionId, restaurant);
       setRestaurant("");
       setHasSuggested(true); // Disable form after submission
     }

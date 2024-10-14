@@ -101,10 +101,10 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
 
       {!mustSpin && selectedRestaurant && (
         <>
-          <Typography variant="h6" sx={{ color: "#ff5722", marginTop: "20px"}}>
+          <Typography variant="body1" sx={{ color: "#ff5722", marginTop: "20px"}}>
             Selected Restaurant: {selectedRestaurant}
           </Typography>
-          <Typography variant="h6" sx={{ color: "#333", marginTop: "20px"}}>
+          <Typography variant="body1" sx={{ color: "#333", marginTop: "20px"}}>
             Thanks for playing! This room is now closing, and you will be redirected back to the home page.
           </Typography>
         </>

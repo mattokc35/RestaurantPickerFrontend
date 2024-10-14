@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import HomePage from "./components/HomePage";
-import SessionPage from "./components/SessionPage";
+import HomePage from "./pages/HomePage";
+import SessionPage from "./pages/SessionPage";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
 import "./App.css";
 
