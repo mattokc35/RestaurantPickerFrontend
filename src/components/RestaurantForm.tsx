@@ -12,14 +12,16 @@ import {
 } from "@mui/material";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import IcecreamIcon from "@mui/icons-material/Icecream";
+import MessageDisplay from "../components/MessageDisplay";
 
 interface restaurantFormProps {
-  sessionId?: string
+  sessionId?: string;
 }
 
-const RestaurantForm = ({sessionId}: restaurantFormProps) => {
+const RestaurantForm = ({ sessionId }: restaurantFormProps) => {
   const [restaurant, setRestaurant] = useState("");
   const [hasSuggested, setHasSuggested] = useState(false); // Track whether the user has suggested
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Track error messages
   const { socket } = useWebSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -27,7 +29,6 @@ const RestaurantForm = ({sessionId}: restaurantFormProps) => {
   const handleSubmit = () => {
     if (socket && restaurant) {
       socket.emit("suggest-restaurant", sessionId, restaurant);
-      setRestaurant("");
       setHasSuggested(true); // Disable form after submission
     }
   };
@@ -36,7 +37,7 @@ const RestaurantForm = ({sessionId}: restaurantFormProps) => {
     if (socket) {
       // Listen for any errors from the backend
       socket.on("error", (message) => {
-        alert(message); // Show the error (e.g., if the user has already suggested)
+        setErrorMessage(message); // Set the error message
       });
 
       // Clean up the listener
@@ -125,6 +126,16 @@ const RestaurantForm = ({sessionId}: restaurantFormProps) => {
           </Button>
         </Grid>
       </Grid>
+
+      {/* Display error message */}
+      {hasSuggested && (
+        <MessageDisplay
+          message={`You have suggested the restaurant '${restaurant}'. Waiting for others...`}
+          type="validation"
+        />
+      )}
+
+      <MessageDisplay message={errorMessage} type="error" />
     </Box>
   );
 };
