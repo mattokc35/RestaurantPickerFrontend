@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -14,6 +14,7 @@ import { useRoleStore } from "../store/roleStore";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import IcecreamIcon from "@mui/icons-material/Icecream";
+import MessageDisplay from "../components/MessageDisplay"; // Import the new component
 
 const generateRoomId = () => {
   return Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -30,25 +31,10 @@ const HomePage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const setRole = useRoleStore((state) => state.setRole);
   const { socket } = useWebSocket(); // Access the socket instance
-  const [error, setError] = useState<string | null>(null); // Track errors
-
-  // Handle room full error
-  useEffect(() => {
-    if (socket) {
-      socket.on("error", (message: string) => {
-        setError(message); // Set error message
-        alert(message); // Show alert to the user
-        console.error(error);
-      });
-
-      return () => {
-        socket.off("error"); // Clean up on unmount
-      };
-    }
-  }, [socket]);
 
   // Handle session creation
   const handleCreateSession = () => {
+    setErrorMessage(null);
     const newSessionId = generateRoomId();
     setRole("host");
     setSessionId(newSessionId);
@@ -156,7 +142,7 @@ const HomePage = () => {
             "&.Mui-focused fieldset": { borderColor: "#ff5722" },
           },
           "& .MuiInputLabel-root": { color: "#888" },
-          maxWidth: "400px",
+          maxWidth: "250px",
         }}
       />
 
@@ -179,24 +165,8 @@ const HomePage = () => {
         Join Room
       </Button>
 
-      {errorMessage && (
-        <Typography
-          variant="body2"
-          mt="4"
-          sx={{ marginTop: "10px", color: "red" }}
-        >
-          {errorMessage}
-        </Typography>
-      )}
-      {validationMessage && (
-        <Typography
-          mt="4"
-          variant="body2"
-          sx={{ marginTop: "10px", color: "#4caf50" }}
-        >
-          {validationMessage}
-        </Typography>
-      )}
+      <MessageDisplay message={errorMessage} type="error" />
+      <MessageDisplay message={validationMessage} type="validation" />
     </Box>
   );
 };
