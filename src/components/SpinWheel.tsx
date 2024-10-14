@@ -6,9 +6,10 @@ import { Wheel } from "react-custom-roulette";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
-import IcecreamIcon from "@mui/icons-material/Icecream"; // Add playful ice cream icon
+import IcecreamIcon from "@mui/icons-material/Icecream";
 import Confetti from "react-confetti";
 import { useRoleStore } from "../store/roleStore";
+import MessageDisplay from "../components/MessageDisplay"; // Import MessageDisplay component
 
 type SpinWheelProps = {
   restaurants: string[];
@@ -16,19 +17,23 @@ type SpinWheelProps = {
 
 const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
   const { socket } = useWebSocket();
-  const navigate = useNavigate(); 
-  const role = useRoleStore((state)=>state.role);
+  const navigate = useNavigate();
+  const role = useRoleStore((state) => state.role);
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [spinResult, setSpinResult] = useState<number | null>(null);
   const [mustSpin, setMustSpin] = useState(false);
   const [spinning, setSpinning] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // State variables for error and success messages
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const data = restaurants.map((restaurant) => ({ option: restaurant }));
 
   const handleSpin = () => {
     if (socket && restaurants.length > 0 && !spinning && role === "host") {
-      setSpinning(true); 
+      setSpinning(true);
       socket.emit("spin-wheel");
     }
   };
@@ -36,21 +41,22 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
   useEffect(() => {
     if (socket) {
       socket.on("spin-wheel", ({ index }) => {
-        setSelectedRestaurant(null); 
-        setSpinResult(index); 
-        setMustSpin(true); 
+        setSelectedRestaurant(null);
+        setSpinResult(index);
+        setMustSpin(true);
         setSpinning(true);
       });
 
       socket.on("session-deleted", () => {
+        setErrorMessage("The session was deleted. Redirecting to the home page...");
         setTimeout(() => {
-          navigate("/"); 
-        }, 2000); 
+          navigate("/");
+        }, 2000);
       });
 
       return () => {
         socket.off("spin-wheel");
-        socket.off("session-deleted"); 
+        socket.off("session-deleted");
       };
     }
   }, [socket, navigate]);
@@ -58,6 +64,7 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
   useEffect(() => {
     if (selectedRestaurant) {
       setShowConfetti(true);
+      setSuccessMessage(`Selected restaurant: ${selectedRestaurant}. This room is now closing.`);
       setTimeout(() => {
         setShowConfetti(false);
         socket?.emit("delete-session");
@@ -84,9 +91,9 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
           backgroundColors={["#ff9800", "#ff5722", "#ff1744", "#ffc107"]}
           textColors={["#ffffff"]}
           onStopSpinning={() => {
-            setSpinning(false); 
-            setMustSpin(false); 
-            setSelectedRestaurant(restaurants[spinResult ?? 0]); 
+            setSpinning(false);
+            setMustSpin(false);
+            setSelectedRestaurant(restaurants[spinResult ?? 0]);
           }}
           outerBorderColor="#333"
           outerBorderWidth={8}
@@ -101,10 +108,10 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
 
       {!mustSpin && selectedRestaurant && (
         <>
-          <Typography variant="body1" sx={{ color: "#ff5722", marginTop: "20px"}}>
+          <Typography variant="body1" sx={{ color: "#ff5722", marginTop: "20px" }}>
             Selected Restaurant: {selectedRestaurant}
           </Typography>
-          <Typography variant="body1" sx={{ color: "#333", marginTop: "20px"}}>
+          <Typography variant="body1" sx={{ color: "#333", marginTop: "20px" }}>
             Thanks for playing! This room is now closing, and you will be redirected back to the home page.
           </Typography>
         </>
@@ -123,7 +130,6 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
             "&:hover": {
               backgroundColor: "#ff1744",
             },
-
             maxWidth: "400px",
             borderRadius: "12px",
             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)"
@@ -133,6 +139,10 @@ const SpinWheel: React.FC<SpinWheelProps> = ({ restaurants }) => {
           Spin the Wheel
         </Button>
       )}
+
+      {/* Display messages */}
+      <MessageDisplay message={errorMessage} type="error" />
+      <MessageDisplay message={successMessage} type="validation" />
     </Box>
   );
 };

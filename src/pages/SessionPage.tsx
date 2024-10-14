@@ -13,11 +13,11 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
 import IcecreamIcon from "@mui/icons-material/Icecream";
+import MessageDisplay from "../components/MessageDisplay"; // Import the MessageDisplay component
 
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
@@ -26,6 +26,7 @@ const SessionPage = () => {
   const role = useRoleStore((state) => state.role);
   const [restaurants, setRestaurants] = useState<string[]>([]);
   const [userCount, setUserCount] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Track success messages
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -49,7 +50,7 @@ const SessionPage = () => {
 
       // Handle restaurant selection after spinning the wheel
       socket.on("restaurant-selected", (restaurant: string) => {
-        alert(`Selected restaurant: ${restaurant}`);
+        setSuccessMessage(`Selected restaurant: ${restaurant}`);
       });
 
       // Handle updated user count
@@ -59,7 +60,6 @@ const SessionPage = () => {
 
       // Handle session deletion
       socket.on("session-deleted", () => {
-        alert("The session was deleted.");
         navigate("/"); // Redirect to home page
       });
 
@@ -155,7 +155,7 @@ const SessionPage = () => {
               </Typography>
             )}
 
-            <RestaurantForm sessionId={id}/>
+            <RestaurantForm sessionId={id} />
             <Box sx={{ width: "100%", marginTop: "20px" }}>
               <Typography
                 variant="h6"
@@ -220,6 +220,9 @@ const SessionPage = () => {
           </Typography>
         )}
       </Box>
+
+      {/* Display messages */}
+      <MessageDisplay message={successMessage} type="validation" />
     </Box>
   );
 };
