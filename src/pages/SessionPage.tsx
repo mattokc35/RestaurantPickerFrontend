@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useWebSocket } from "../contexts/WebSocketContext";
 import RestaurantForm from "../components/RestaurantForm";
 import SpinWheel from "../components/SpinWheel";
@@ -10,6 +10,8 @@ import {
   List,
   ListItem,
   Stack,
+  Button,
+  Modal,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
@@ -17,16 +19,27 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
 import IcecreamIcon from "@mui/icons-material/Icecream";
-import MessageDisplay from "../components/MessageDisplay"; // Import the MessageDisplay component
+import MessageDisplay from "../components/MessageDisplay";
+
+export interface Restaurant {
+  name: string;
+  suggestedBy: string;
+}
 
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation(); // To handle route changes
   const role = useRoleStore((state) => state.role);
-  const [restaurants, setRestaurants] = useState<string[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [userCount, setUserCount] = useState<number | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Track success messages
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [sessionDeleted, setSessionDeleted] = useState<boolean>(false); // State to control modal visibility
+  const [leaveWarning, setLeaveWarning] = useState<boolean>(false); // To control the leave warning modal
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
+    null
+  ); // To store the navigation path
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -39,12 +52,12 @@ const SessionPage = () => {
       }
 
       // Get the current list of restaurants when joining the session
-      socket.on("current-restaurants", (restaurantList: string[]) => {
+      socket.on("current-restaurants", (restaurantList: Restaurant[]) => {
         setRestaurants(restaurantList);
       });
 
       // Add new suggested restaurants
-      socket.on("restaurant-suggested", (newRestaurant: string) => {
+      socket.on("restaurant-suggested", (newRestaurant: Restaurant) => {
         setRestaurants((prev) => [...prev, newRestaurant]);
       });
 
@@ -58,13 +71,14 @@ const SessionPage = () => {
         setUserCount(count);
       });
 
-      // Handle session deletion
+      // Handle session deletion - show modal
       socket.on("session-deleted", () => {
-        navigate("/"); // Redirect to home page
+        setSessionDeleted(true);
       });
 
       // Clean up socket listeners when component unmounts
       return () => {
+        socket.emit("leave-session", id);
         socket.off("current-restaurants");
         socket.off("restaurant-suggested");
         socket.off("restaurant-selected");
@@ -73,6 +87,43 @@ const SessionPage = () => {
       };
     }
   }, [socket, id, role, navigate]);
+
+  // Handle the "OK" button in the session deleted modal
+  const handleModalClose = () => {
+    setSessionDeleted(false);
+    navigate("/"); // Navigate back to home
+  };
+
+  // Handle the "Yes" button in the leave warning modal
+  const confirmLeave = () => {
+    setLeaveWarning(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation); // Navigate to the desired path
+    }
+  };
+
+  // Handle the "No" button in the leave warning modal
+  const cancelLeave = () => {
+    setLeaveWarning(false);
+    setPendingNavigation(null); // Reset pending navigation
+  };
+
+  // Intercept route change attempts
+  useEffect(() => {}, [location.pathname, navigate]);
+
+  // Warn before closing the browser or tab
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = ""; // Modern browsers require setting returnValue
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <Box
@@ -174,7 +225,7 @@ const SessionPage = () => {
                     padding: 0,
                   }}
                 >
-                  {restaurants.map((r, index) => (
+                  {restaurants.map((restaurant, index) => (
                     <ListItem
                       key={index}
                       sx={{
@@ -195,7 +246,7 @@ const SessionPage = () => {
                         variant="body1"
                         sx={{ color: "#333", fontWeight: "bold" }}
                       >
-                        {r}
+                        {restaurant.name} ({restaurant.suggestedBy})
                       </Typography>
                       {/* Add a playful food icon next to each restaurant */}
                       <FastfoodIcon sx={{ color: "#ff9800" }} />
@@ -221,8 +272,108 @@ const SessionPage = () => {
         )}
       </Box>
 
-      {/* Display messages */}
+      {/* Display success messages */}
       <MessageDisplay message={successMessage} type="validation" />
+
+      {/* Modal for session deletion */}
+      <Modal
+        open={sessionDeleted}
+        onClose={handleModalClose}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 300,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            id="modal-title"
+            variant="h6"
+            component="h2"
+            sx={{ color: "#ff5722" }}
+          >
+            Session Deleted
+          </Typography>
+          <Typography id="modal-description" sx={{ color: "#ff5722", mt: 2 }}>
+            The session has been deleted by the host.
+          </Typography>
+          <Button
+            onClick={handleModalClose}
+            variant="contained"
+            sx={{ mt: 3, backgroundColor: "#ff5722", color: "#fff" }}
+          >
+            Back To Home
+          </Button>
+        </Box>
+      </Modal>
+
+      {/* Modal for leaving the session */}
+      <Modal
+        open={leaveWarning}
+        onClose={cancelLeave}
+        aria-labelledby="leave-modal-title"
+        aria-describedby="leave-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 300,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            id="leave-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{ color: "#ff5722" }}
+          >
+            {role === "host"
+              ? "Leaving will delete the room"
+              : "Leaving will leave the room"}
+          </Typography>
+          <Typography
+            id="leave-modal-description"
+            sx={{ color: "#ff5722", mt: 2 }}
+          >
+            {role === "host"
+              ? "You are the host, leaving will delete the room and kick everyone out."
+              : "Leaving will remove you from the room and delete your restaurant suggestion."}
+          </Typography>
+          <Stack direction="row" justifyContent="center" spacing={2} mt={3}>
+            <Button
+              onClick={confirmLeave}
+              variant="contained"
+              sx={{ backgroundColor: "#ff5722", color: "#fff" }}
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={cancelLeave}
+              variant="outlined"
+              sx={{ color: "#ff5722", borderColor: "#ff5722" }}
+            >
+              No
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
     </Box>
   );
 };
