@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useWebSocket } from "../contexts/WebSocketContext";
 import RestaurantForm from "../components/RestaurantForm";
 import SpinWheel from "../components/SpinWheel";
+import QuickDrawGame from "../components/games/QuickDrawGame";
 import { useRoleStore } from "../store/roleStore";
 import {
   Box,
@@ -14,6 +15,10 @@ import {
   Modal,
   useTheme,
   useMediaQuery,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
@@ -26,20 +31,18 @@ export interface Restaurant {
   suggestedBy: string;
 }
 
+export type Game = "wheel" | "quick-draw";
+
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation(); // To handle route changes
   const role = useRoleStore((state) => state.role);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [userCount, setUserCount] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [sessionDeleted, setSessionDeleted] = useState<boolean>(false); // State to control modal visibility
-  const [leaveWarning, setLeaveWarning] = useState<boolean>(false); // To control the leave warning modal
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
-    null
-  ); // To store the navigation path
+  const [gameOption, setGameOption] = useState("wheel");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -55,6 +58,10 @@ const SessionPage = () => {
       socket.on("current-restaurants", (restaurantList: Restaurant[]) => {
         setRestaurants(restaurantList);
       });
+
+      socket.on("game-option-updated", (newGameOption: string)=> {
+        setGameOption(newGameOption);
+      })
 
       // Add new suggested restaurants
       socket.on("restaurant-suggested", (newRestaurant: Restaurant) => {
@@ -84,6 +91,7 @@ const SessionPage = () => {
         socket.off("restaurant-selected");
         socket.off("current-users");
         socket.off("session-deleted");
+        socket.off("game-option-updated");
       };
     }
   }, [socket, id, role, navigate]);
@@ -94,36 +102,13 @@ const SessionPage = () => {
     navigate("/"); // Navigate back to home
   };
 
-  // Handle the "Yes" button in the leave warning modal
-  const confirmLeave = () => {
-    setLeaveWarning(false);
-    if (pendingNavigation) {
-      navigate(pendingNavigation); // Navigate to the desired path
+  const handleGameOptionChange = (e: any) => {
+    const newGameOption = e.target.value as string;
+    setGameOption(newGameOption);
+    if(role === "host" && socket){
+      socket.emit("game-option-changed", {sessionId: id, gameOption: newGameOption});
     }
   };
-
-  // Handle the "No" button in the leave warning modal
-  const cancelLeave = () => {
-    setLeaveWarning(false);
-    setPendingNavigation(null); // Reset pending navigation
-  };
-
-  // Intercept route change attempts
-  useEffect(() => {}, [location.pathname, navigate]);
-
-  // Warn before closing the browser or tab
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = ""; // Modern browsers require setting returnValue
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
 
   return (
     <Box
@@ -259,9 +244,37 @@ const SessionPage = () => {
                 </Typography>
               )}
             </Box>
+
             <Box sx={{ marginTop: "30px" }}>
               {restaurants.length > 0 && (
-                <SpinWheel restaurants={restaurants} />
+                <>
+                  {role === "host" ? (
+                    <FormControl sx={{marginBottom: "10px"}} fullWidth>
+                      {" "}
+                      <InputLabel id="select-game-label">
+                        Choose Game
+                      </InputLabel>
+                      <Select
+                        labelId="select-game-label"
+                        id="select-game"
+                        value={gameOption}
+                        onChange={handleGameOptionChange}
+                      >
+                        <MenuItem value="wheel">Spin the Wheel</MenuItem>
+                        <MenuItem value="quick-draw">Quick Draw Game</MenuItem>
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    <Typography sx={{ color: "#ff9800", marginBottom:"10px" }}>
+                      Currently selected game: {gameOption}
+                    </Typography>
+                  )}
+                  {gameOption === "wheel" ? (
+                    <SpinWheel restaurants={restaurants} />
+                  ) : (
+                    <QuickDrawGame />
+                  )}
+                </>
               )}
             </Box>
           </>
@@ -314,64 +327,6 @@ const SessionPage = () => {
           >
             Back To Home
           </Button>
-        </Box>
-      </Modal>
-
-      {/* Modal for leaving the session */}
-      <Modal
-        open={leaveWarning}
-        onClose={cancelLeave}
-        aria-labelledby="leave-modal-title"
-        aria-describedby="leave-modal-description"
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 300,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            id="leave-modal-title"
-            variant="h6"
-            component="h2"
-            sx={{ color: "#ff5722" }}
-          >
-            {role === "host"
-              ? "Leaving will delete the room"
-              : "Leaving will leave the room"}
-          </Typography>
-          <Typography
-            id="leave-modal-description"
-            sx={{ color: "#ff5722", mt: 2 }}
-          >
-            {role === "host"
-              ? "You are the host, leaving will delete the room and kick everyone out."
-              : "Leaving will remove you from the room and delete your restaurant suggestion."}
-          </Typography>
-          <Stack direction="row" justifyContent="center" spacing={2} mt={3}>
-            <Button
-              onClick={confirmLeave}
-              variant="contained"
-              sx={{ backgroundColor: "#ff5722", color: "#fff" }}
-            >
-              Yes
-            </Button>
-            <Button
-              onClick={cancelLeave}
-              variant="outlined"
-              sx={{ color: "#ff5722", borderColor: "#ff5722" }}
-            >
-              No
-            </Button>
-          </Stack>
         </Box>
       </Modal>
     </Box>
