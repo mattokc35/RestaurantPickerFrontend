@@ -59,9 +59,9 @@ const SessionPage = () => {
         setRestaurants(restaurantList);
       });
 
-      socket.on("game-option-updated", (newGameOption: string)=> {
+      socket.on("game-option-updated", (newGameOption: string) => {
         setGameOption(newGameOption);
-      })
+      });
 
       // Add new suggested restaurants
       socket.on("restaurant-suggested", (newRestaurant: Restaurant) => {
@@ -105,8 +105,11 @@ const SessionPage = () => {
   const handleGameOptionChange = (e: any) => {
     const newGameOption = e.target.value as string;
     setGameOption(newGameOption);
-    if(role === "host" && socket){
-      socket.emit("game-option-changed", {sessionId: id, gameOption: newGameOption});
+    if (role === "host" && socket) {
+      socket.emit("game-option-changed", {
+        sessionId: id,
+        gameOption: newGameOption,
+      });
     }
   };
 
@@ -249,23 +252,40 @@ const SessionPage = () => {
               {restaurants.length > 0 && (
                 <>
                   {role === "host" ? (
-                    <FormControl sx={{marginBottom: "10px"}} fullWidth>
-                      {" "}
-                      <InputLabel id="select-game-label">
-                        Choose Game
-                      </InputLabel>
+                    <FormControl
+                      sx={{
+                        marginBottom: "10px",
+                        zIndex: 10,
+                        position: "relative",
+                      }}
+                      fullWidth
+                    >
+                      <Typography
+                variant="h6"
+                sx={{ color: "#333", marginBottom: "10px" }}
+              >
+                Choose Game:
+              </Typography>
+                
                       <Select
                         labelId="select-game-label"
                         id="select-game"
                         value={gameOption}
                         onChange={handleGameOptionChange}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              zIndex: 11, // Higher z-index for the dropdown menu
+                            },
+                          },
+                        }}
                       >
                         <MenuItem value="wheel">Spin the Wheel</MenuItem>
                         <MenuItem value="quick-draw">Quick Draw Game</MenuItem>
                       </Select>
                     </FormControl>
                   ) : (
-                    <Typography sx={{ color: "#ff9800", marginBottom:"10px" }}>
+                    <Typography sx={{ color: "#ff9800", marginBottom: "10px" }}>
                       Currently selected game: {gameOption}
                     </Typography>
                   )}
