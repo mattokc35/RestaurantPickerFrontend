@@ -18,7 +18,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
 } from "@mui/material";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import FastfoodIcon from "@mui/icons-material/Fastfood";
