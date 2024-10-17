@@ -24,24 +24,19 @@ import FastfoodIcon from "@mui/icons-material/Fastfood";
 import LocalPizzaIcon from "@mui/icons-material/LocalPizza";
 import IcecreamIcon from "@mui/icons-material/Icecream";
 import MessageDisplay from "../components/MessageDisplay";
-
-export interface Restaurant {
-  name: string;
-  suggestedBy: string;
-}
-
-export type Game = "wheel" | "quick-draw";
+import { User, Restaurant, Game } from "../types/types";
 
 const SessionPage = () => {
   const { socket, connected } = useWebSocket();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const role = useRoleStore((state) => state.role);
+  const [currentUser, setCurrentUser]= useState<User | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [userCount, setUserCount] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [sessionDeleted, setSessionDeleted] = useState<boolean>(false); // State to control modal visibility
-  const [gameOption, setGameOption] = useState("wheel");
+  const [gameOption, setGameOption] = useState<Game>("wheel");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -58,8 +53,13 @@ const SessionPage = () => {
         setRestaurants(restaurantList);
       });
 
+      // get and set the user details
+      socket.on("user-details", (userInfo: User) => {
+        setCurrentUser(userInfo);
+      })
+
       socket.on("game-option-updated", (newGameOption: string) => {
-        setGameOption(newGameOption);
+        setGameOption(newGameOption as Game);
       });
 
       // Add new suggested restaurants
@@ -91,6 +91,7 @@ const SessionPage = () => {
         socket.off("current-users");
         socket.off("session-deleted");
         socket.off("game-option-updated");
+        socket.off("user-details");
       };
     }
   }, [socket, id, role, navigate]);
@@ -103,7 +104,7 @@ const SessionPage = () => {
 
   const handleGameOptionChange = (e: any) => {
     const newGameOption = e.target.value as string;
-    setGameOption(newGameOption);
+    setGameOption(newGameOption as Game);
     if (role === "host" && socket) {
       socket.emit("game-option-changed", {
         sessionId: id,
@@ -165,16 +166,19 @@ const SessionPage = () => {
         </Typography>
         {connected && role ? (
           <>
+          <Typography variant="h6" sx={{ color: "#ff9800" }}>
+                  Hello {currentUser && (currentUser.username)}!
+                </Typography>
             {role === "host" ? (
               <>
-                <Typography variant="body2" sx={{ color: "#4CAF50" }}>
+                <Typography variant="h6" sx={{ color: "#ff9800" }}>
                   You are the Host. Please suggest a restaurant and wait for
                   other guests to submit their restaurants as well. You can then
                   spin the wheel or start a game!
                 </Typography>
               </>
             ) : (
-              <Typography variant="body2" sx={{ color: "#F44336" }}>
+              <Typography variant="h6" sx={{ color: "#ff9800" }}>
                 You are a Guest. Please suggest a restaurant then wait for the
                 host to spin the wheel or start the game!
               </Typography>
@@ -233,7 +237,7 @@ const SessionPage = () => {
                         variant="body1"
                         sx={{ color: "#333", fontWeight: "bold" }}
                       >
-                        {restaurant.name} ({restaurant.suggestedBy})
+                        {restaurant.name} ({restaurant.suggestedBy.username})
                       </Typography>
                       {/* Add a playful food icon next to each restaurant */}
                       <FastfoodIcon sx={{ color: "#ff9800" }} />

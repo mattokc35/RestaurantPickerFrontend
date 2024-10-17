@@ -2,6 +2,14 @@ import { useWebSocket } from "../../contexts/WebSocketContext";
 import { useRoleStore } from "../../store/roleStore";
 import { Button, Box, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
+import Leaderboard from "../Leaderboard";
+import { Player } from "../../types/types";
+
+interface quickDrawWinner {
+  restaurant: string;
+  winnerUser: string;
+  winnerScore: number;
+}
 
 const QuickDrawGame: React.FC = () => {
   const { socket } = useWebSocket();
@@ -11,6 +19,8 @@ const QuickDrawGame: React.FC = () => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [waitingForClick, setWaitingForClick] = useState(false);
+  const [gameWinner, setGameWinner] = useState<quickDrawWinner>();
+  const [playerScores, setPlayerScores] = useState<Player[]>();
 
   useEffect(() => {
     if (socket) {
@@ -22,8 +32,14 @@ const QuickDrawGame: React.FC = () => {
 
       socket.on(
         "quick-draw-winner",
-        (restaurant: string, winnerId: string, winnerScore: number) => {
-          alert(`The winner is ${restaurant}, ${winnerId}, ${winnerScore}`);
+        (
+          restaurant: string,
+          winnerUser: string,
+          winnerScore: number,
+          playerScores: Player[]
+        ) => {
+          setGameWinner({ restaurant, winnerUser, winnerScore });
+          setPlayerScores(playerScores);
         }
       );
 
@@ -159,11 +175,24 @@ const QuickDrawGame: React.FC = () => {
       {/* Show the player's reaction time */}
       {reactionTime && (
         <Typography
-          variant="h4"
-          sx={{ color: "#333", marginTop: "20px", fontWeight: "bold" }}
+          variant="h6"
+          sx={{ color: "#333", marginTop: "20px", fontWeight: "normal" }}
         >
-          Your reaction time: {reactionTime}ms
+          Your reaction time: {reactionTime} ms
         </Typography>
+      )}
+      {gameWinner && playerScores && (
+        <>
+          <Typography
+            variant="h6"
+            sx={{ color: "#333", marginTop: "20px", fontWeight: "normal" }}
+          >
+            {gameWinner.winnerUser} has won with a time of{" "}
+            {gameWinner.winnerScore} ms. Their selected restaurant is:{" "}
+            <span style={{ fontWeight: "bold" }}>{gameWinner.restaurant}</span>
+          </Typography>
+          <Leaderboard scores={playerScores} />
+        </>
       )}
     </Box>
   );

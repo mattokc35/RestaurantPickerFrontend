@@ -10,8 +10,7 @@ import IcecreamIcon from "@mui/icons-material/Icecream";
 import Confetti from "react-confetti";
 import { useRoleStore } from "../store/roleStore";
 import MessageDisplay from "../components/MessageDisplay";
-import { Restaurant } from "../pages/SessionPage";
-
+import { Restaurant } from "../types/types";
 type SpinWheelProps = {
   restaurants: Restaurant[];
 };
